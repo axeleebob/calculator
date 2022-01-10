@@ -1,0 +1,112 @@
+:root{
+    --calculator-color: #1A1A1D;
+    --screen-color: #6F2232;
+    --screen-text-color: white;
+    --number-button-color: #6F2232;
+    --operator-button-color: #C3073F;
+    --button-text-color: white;
+}
+
+html > * {
+    font-family: Arial, Helvetica, sans-serif;
+    margin: 0px;
+    padding: 0px;
+}
+
+html, body {
+    height: 100%;
+}
+
+body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.calculator {
+    flex: 0 0 auto;
+    background-color: var(--calculator-color);
+    display: flex;
+    flex-direction: column;
+    border-radius: 25px;
+    padding: 15px;
+    width: 350px;
+    height: 500px;
+}
+
+.screen {
+    flex: 1;
+    margin: 10px;
+    padding: 10px;
+    background-color: var(--screen-color);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: flex-end;
+}
+
+.screen-text {
+    margin: 0px;
+    color: var(--screen-text-color);
+    font-size: 40px;
+    overflow: hidden;
+}
+
+#row-1-text, #row-2-text, #row-3-text {
+    color: rgb(180, 180, 180);
+}
+
+.buttons-row {
+    flex: 1;
+    display: flex;
+    gap: 10px;
+}
+
+.buttons {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 10px;
+}
+
+.space {
+    flex: 1;
+    margin: 7px;
+}
+
+button.clear {
+    background-color: white;
+    border: 1px solid white;
+    color: rgb(228, 91, 91);
+    flex: 1;
+    border-radius: 25px;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+button.number {
+    background-color: var(--number-button-color);
+    color: var(--button-text-color);
+    flex: 1;
+    border-radius: 25px;
+    font-size: 20px;
+    border: 1px solid var(--number-button-color);
+}
+
+button.operator {
+    background-color: var(--operator-button-color);
+    color: var(--button-text-color);
+    flex: 1;
+    border-radius: 25px;
+    font-size: 20px;
+    border: 1px solid var(--operator-button-color);
+}
+
+button:hover {
+    cursor: pointer;
+}
+
+button:active {
+    border: 1px solid var(--calculator-color);
+}
