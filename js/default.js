@@ -1,3 +1,4 @@
+//used to know how much information is currently being displayed on the screen
 let calculationPosition = 0;
 
 const add = function(x, y) {
@@ -21,6 +22,7 @@ const operate = function(x, y, operation) {
         case "+": return add(x, y); break;
         case "-": return subtract(x, y); break;
         case "x": return multiply(x, y); break;
+        case "*": return multiply(x, y); break;
         case "/": return divide(x, y); break;
     }
 };
@@ -74,7 +76,13 @@ const updateScreenOperator = function(input) {
 
 const trimForScreen = function (num) {
     numLength = num.toString().replace(".","").length;
-    return (numLength > 13) ? (num >= 9999999999999 ? num.toPrecision(9) : num.toPrecision(13)) : num;
+
+    let absNum = Math.abs(num)
+
+    return (absNum >= 9999999999999) ? num.toPrecision(9) :
+           (absNum >= 0 && absNum < 1) ? Math.round(num*Math.pow(10, 12))/Math.pow(10, 12) :
+           numLength > 13 ? num.toPrecision(13):
+           num;
 }
 
 const calculateScreen = function() {
@@ -112,53 +120,84 @@ const reset = function () {
     calculationPosition = 0;
 }
 
+const keyPress = function (key) {
+    if (key.keyCode === 13) {
+        key.preventDefault();
+        document.querySelector("#test").focus();
+    }
+
+    let numbers = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "."];
+    let operators = ["+", "-", "*", "x", "/"];
+    let equalsArray = ["=", "Enter"];
+    let clears = ["Delete"]
+    
+    let operationLookup = {};
+    numbers.forEach(number => operationLookup[number] = "number");
+    operators.forEach(operator => operationLookup[operator] = "operator");
+    equalsArray.forEach(equals => operationLookup[equals] = "equals");
+    clears.forEach(clear => operationLookup[clear] = "clear");
+
+    if (key.key in operationLookup) {
+        console.log(key.key);
+        console.log(operationLookup[key.key])
+        operateCalculator(key.key, operationLookup[key.key])
+    }
+}
+
 const buttonPress = function(buttonClick) {
-    if (buttonClick.target.innerText === "AC") {
+    //clears the calculator if AC (all clear) is pushed
+    if (buttonClick.target.innerText === "AC") operateCalculator("NA", "full-clear");
+
+    operateCalculator(buttonClick.target.textContent, buttonClick.target.classList[0])
+};
+
+const operateCalculator = function(calculationInput, calculationType) {
+    if (calculationType === "full-clear") {
         reset();
         return;
     }
     switch(calculationPosition) {
         case 0: //calculator is clear
-            switch(buttonClick.target.classList[0]) {
+            switch(calculationType) {
                 case "number": 
-                    updateScreenNumber(buttonClick.target.textContent);
+                    updateScreenNumber(calculationInput);
                     calculationPosition = 1;
                     break;
                 case "operator":
-                    if (buttonClick.target.textContent === "+" || buttonClick.target.textContent === "-") {
-                        updateScreenOperator(buttonClick.target.textContent);
+                    if (calculationInput === "+" || calculationInput === "-") {
+                        updateScreenOperator(calculationInput);
                     };
                     break;
                 case "clear": revertCalculation(); break;
             } break;
         case 1: //first number is partially or fully entered with no operator
-            switch(buttonClick.target.classList[0]) {
-                case "number": updateScreenNumber(buttonClick.target.textContent); break;
+            switch(calculationType) {
+                case "number": updateScreenNumber(calculationInput); break;
                 case "operator":
                     shiftScreenContent();
-                    updateScreenOperator(buttonClick.target.textContent); 
+                    updateScreenOperator(calculationInput); 
                     calculationPosition = 2;
                     break;
                 case "clear": revertCalculation(); break;
             } break;
         case 2: //first number has been stored on screen, operator has been selected
-            switch(buttonClick.target.classList[0]) {
+            switch(calculationType) {
                 case "number":
                     shiftScreenContent();
-                    updateScreenNumber(buttonClick.target.textContent);
+                    updateScreenNumber(calculationInput);
                     calculationPosition = 3;
                     break;
-                case "operator": updateScreenOperator(buttonClick.target.textContent); break;
+                case "operator": updateScreenOperator(calculationInput); break;
                 case "clear": revertCalculation(); break;
             } break;
         case 3: //first number has been stored on screen, operator has been selected, third number is
                 //being entered on the screen
-            switch(buttonClick.target.classList[0]) {
-                case "number": updateScreenNumber(buttonClick.target.textContent); break;
+            switch(calculationType) {
+                case "number": updateScreenNumber(calculationInput); break;
                 case "operator": 
                     calculateScreen();
                     prepareNextCalculation();
-                    updateScreenOperator(buttonClick.target.textContent);
+                    updateScreenOperator(calculationInput);
                     calculationPosition = 2;
                     break;
                 case "clear": revertCalculation(); break;
@@ -168,14 +207,14 @@ const buttonPress = function(buttonClick) {
                     break;
             } break;
         case 4: //calculation is showing on the screen
-        switch(buttonClick.target.classList[0]) {
+        switch(calculationType) {
             case "number": 
                 reset();
-                buttonPress(buttonClick);
+                operateCalculator(calculationInput, calculationType);
                 break;
             case "operator": 
                 prepareNextCalculation();
-                updateScreenOperator(buttonClick.target.textContent);
+                updateScreenOperator(calculationInput);
                 calculationPosition = 2;
                 break;
             case "clear": revertCalculation(); break;
@@ -185,3 +224,5 @@ const buttonPress = function(buttonClick) {
 
 const buttons = document.querySelectorAll("button");
 buttons.forEach(button => button.addEventListener("click", e => buttonPress(e)))
+
+document.addEventListener("keypress", e => keyPress(e));

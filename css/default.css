@@ -110,3 +110,8 @@ button:hover {
 button:active {
     border: 1px solid var(--calculator-color);
 }
+
+button:focus {
+    outline: none;
+    box-shadow: none;
+  }
