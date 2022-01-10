@@ -121,11 +121,9 @@ const reset = function () {
 }
 
 const keyPress = function (key) {
-    if (key.keyCode === 13) {
-        key.preventDefault();
-        document.querySelector("#test").focus();
-    }
-
+    //escapes the keyPress function if the user is using enter to push buttons
+    if (!(document.querySelector("body") === document.activeElement) && key.keyCode === 13) return;
+    
     let numbers = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "."];
     let operators = ["+", "-", "*", "x", "/"];
     let equalsArray = ["=", "Enter"];
@@ -137,18 +135,19 @@ const keyPress = function (key) {
     equalsArray.forEach(equals => operationLookup[equals] = "equals");
     clears.forEach(clear => operationLookup[clear] = "clear");
 
-    if (key.key in operationLookup) {
-        console.log(key.key);
-        console.log(operationLookup[key.key])
-        operateCalculator(key.key, operationLookup[key.key])
-    }
+    if (key.key in operationLookup) operateCalculator(key.key, operationLookup[key.key])
 }
 
 const buttonPress = function(buttonClick) {
     //clears the calculator if AC (all clear) is pushed
     if (buttonClick.target.innerText === "AC") operateCalculator("NA", "full-clear");
 
-    operateCalculator(buttonClick.target.textContent, buttonClick.target.classList[0])
+    operateCalculator(buttonClick.target.textContent, buttonClick.target.classList[0]);
+
+    //clears the active element if the user clicked the button with a mouse. This ensures that the user
+    //can use the enter button to use return the calculation if they are not using the enter button
+    //to activate buttons
+    if (buttonClick.detail === 1) document.activeElement.blur();
 };
 
 const operateCalculator = function(calculationInput, calculationType) {
