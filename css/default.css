@@ -1,7 +1,7 @@
 :root {
     --calculator-color: #1A1A1D;
-    --screen-color: #6F2232;
-    --screen-text-color: white;
+    --display-color: #6F2232;
+    --display-text-color: white;
     --number-button-color: #6F2232;
     --operator-button-color: #C3073F;
     --button-text-color: white;
@@ -29,7 +29,7 @@ header, footer {
     flex: 0 0 auto;
     margin-top: auto;
     margin-bottom: 10px;
-    color: var(--screen-color);
+    color: var(--display-color);
     font-weight: bold;
 }
 
@@ -44,11 +44,11 @@ header, footer {
     height: 500px;
 }
 
-.screen {
+.display {
     flex: 1;
     margin: 10px;
     padding: 10px;
-    background-color: var(--screen-color);
+    background-color: var(--display-color);
     border-radius: 10px;
     display: flex;
     flex-direction: column;
@@ -56,9 +56,9 @@ header, footer {
     align-items: flex-end;
 }
 
-.screen-text {
+.display-text {
     margin: 0px;
-    color: var(--screen-text-color);
+    color: var(--display-text-color);
     font-size: 40px;
     overflow: hidden;
 }

@@ -1,4 +1,4 @@
-//used to know how much information is currently being displayed on the screen
+//used to know how much information is currently being displayed on the display
 let calculationPosition = 0;
 
 const add = function(x, y) {
@@ -27,54 +27,57 @@ const operate = function(x, y, operation) {
     };
 };
 
-const revertCalculation = function() {
-    let rowOneText = document.querySelector("#row-1-text");
-    let rowTwoText = document.querySelector("#row-2-text");
-    let rowThreeText = document.querySelector("#row-3-text");
-    let rowFourText = document.querySelector("#row-4-text");
+let display = ["", "", "", ""]
 
-    rowFourText.textContent = rowThreeText.textContent;
-    rowThreeText.textContent = rowTwoText.textContent;
-    rowTwoText.textContent = rowOneText.textContent;
-    rowOneText.textContent = "";
+const publishDisplay = function() {
+    displayRows = document.querySelectorAll(".display-text");
+
+    Array.from(displayRows).forEach((displayRow, index) => {
+        displayRow.textContent = display[index]
+    })
+}
+
+const revertCalculation = function() {
+    display.pop();
+    display.unshift("");
+
+    publishDisplay();
 
     if (calculationPosition > 0) calculationPosition--;
 };
 
-const shiftScreenContent = function() {
-    let rowOneText = document.querySelector("#row-1-text");
-    let rowTwoText = document.querySelector("#row-2-text");
-    let rowThreeText = document.querySelector("#row-3-text");
-    let rowFourText = document.querySelector("#row-4-text");
+const shiftDisplay = function() {
+    display.shift();
+    display.push("");
 
-    rowOneText.textContent = rowTwoText.textContent;
-    rowTwoText.textContent = rowThreeText.textContent;
-    rowThreeText.textContent = rowFourText.textContent;
-    rowFourText.textContent = "";
+    publishDisplay();
 };
 
-const fitsOnScreen = function (num) {
-    return num.replace(".", "").length < 13
+const fitsOnDisplay = function (num) {
+    return num.replace(".", "").length <= 13
 };
 
-const updateScreenNumber = function(input) {
-    let rowFourText = document.querySelector("#row-4-text");
-    //escape screen text update if user is trying to add a decimal point to a decimal number
+const updateDisplayBottom = function(input) {
+    //escape display text update if user is trying to add a decimal point to a decimal number
     if (input === ".") {
-        if (rowFourText.textContent.includes(".")) return;
+        if (display[3].includes(".")) return;
     };
-    //limit the input number to 13 numeric digits so that it stays on the screen
-    if (fitsOnScreen(rowFourText.textContent)) {
-        rowFourText.textContent = rowFourText.textContent.concat(input);
+
+    let newContent = display[3].concat(input)
+    //limit the input number to 13 numeric digits so that it stays on the display
+    if (fitsOnDisplay(newContent)) {
+        display[3] = newContent;
     };
+
+    publishDisplay();
 };
 
-const updateScreenOperator = function(input) {
-    let rowFourText = document.querySelector("#row-4-text");
-    rowFourText.textContent = input;
+const updateDisplayOperator = function(input) {
+    display[3] = input;
+    publishDisplay();
 };
 
-const trimForScreen = function (num) {
+const trimForDisplay = function (num) {
     numLength = num.toString().replace(".","").length;
 
     let absNum = Math.abs(num);
@@ -85,48 +88,44 @@ const trimForScreen = function (num) {
            num;
 };
 
-const calculateScreen = function() {
-    shiftScreenContent();
+const calculateDisplay = function() {
+    shiftDisplay();
 
-    let rowOneText = document.querySelector("#row-1-text");
-    let rowTwoText = document.querySelector("#row-2-text");
-    let rowThreeText = document.querySelector("#row-3-text");
-    let rowFourText = document.querySelector("#row-4-text");
-
-    let x = parseFloat(rowOneText.textContent);
-    let y = parseFloat(rowThreeText.textContent);
-    let operator = rowTwoText.textContent;
+    let x = parseFloat(display[0]);
+    let y = parseFloat(display[2]);
+    let operator = display[1];
 
     //The only circumstance where x will be NaN is if x was Infinity due to a user dividing by 0
     if (isNaN(x)) {
-        rowFourText.textContent = "Infinity";
+        display[3] = "Infinity";
     } else {
         let solution = operate(x, y, operator);
-        rowFourText.textContent = trimForScreen(solution);
+        display[3] = trimForDisplay(solution);
     };
+
+    publishDisplay();
 };
 
 const prepareNextCalculation = function() {
-    let screenTextRows = document.querySelectorAll(".screen-text.history");
-    screenTextRows.forEach(screenTextRow => screenTextRow.textContent = "");
-
-    shiftScreenContent();
+    //delete the history
+    display = ["", "", "", display[3]];
+    shiftDisplay();
 };
 
 const reset = function () {
-    let screenTextRows = document.querySelectorAll(".screen-text");
-    screenTextRows.forEach(screenTextRow => screenTextRow.textContent = "");
+    display = ["", "", "", ""]
+    publishDisplay();
 
     calculationPosition = 0;
 };
 
 const deleteLastInput = function () {
-    let rowFourText = document.querySelector("#row-4-text");
     //action of deleting 1 character from a string of length one is the same as clearing the whole row
-    if (rowFourText.textContent.length === 1) {
+    if (display[3].length === 1) {
         operateCalculator("clear");
     } else {
-        rowFourText.textContent = rowFourText.textContent.slice(0, -1);
+        display[3] = display[3].slice(0, -1);
+        publishDisplay();
     };
 };
 
@@ -173,12 +172,12 @@ const operateCalculator = function(calculationType, calculationInput) {
         case 0: //calculator is clear
             switch(calculationType) {
                 case "number": 
-                    updateScreenNumber(calculationInput);
+                    updateDisplayBottom(calculationInput);
                     calculationPosition = 1;
                     break;
                 case "operator":
                     if (calculationInput === "+" || calculationInput === "-") {
-                        updateScreenOperator(calculationInput);
+                        updateDisplayOperator(calculationInput);
                     };
                     break;
                 case "clear": revertCalculation(); break;
@@ -186,44 +185,44 @@ const operateCalculator = function(calculationType, calculationInput) {
             } break;
         case 1: //first number is partially or fully entered with no operator
             switch(calculationType) {
-                case "number": updateScreenNumber(calculationInput); break;
+                case "number": updateDisplayBottom(calculationInput); break;
                 case "operator":
-                    shiftScreenContent();
-                    updateScreenOperator(calculationInput); 
+                    shiftDisplay();
+                    updateDisplayOperator(calculationInput); 
                     calculationPosition = 2;
                     break;
                 case "clear": revertCalculation(); break;
                 case "clear-one": deleteLastInput(); break;
             } break;
-        case 2: //first number has been stored on screen, operator has been selected
+        case 2: //first number has been stored on display, operator has been selected
             switch(calculationType) {
                 case "number":
-                    shiftScreenContent();
-                    updateScreenNumber(calculationInput);
+                    shiftDisplay();
+                    updateDisplayBottom(calculationInput);
                     calculationPosition = 3;
                     break;
-                case "operator": updateScreenOperator(calculationInput); break;
+                case "operator": updateDisplayOperator(calculationInput); break;
                 case "clear": revertCalculation(); break;
                 case "clear-one": deleteLastInput(); break;
             } break;
-        case 3: //first number has been stored on screen, operator has been selected, third number is
-                //being entered on the screen
+        case 3: //first number has been stored on display, operator has been selected, third number is
+                //being entered on the display
             switch(calculationType) {
-                case "number": updateScreenNumber(calculationInput); break;
+                case "number": updateDisplayBottom(calculationInput); break;
                 case "operator": 
-                    calculateScreen();
+                    calculateDisplay();
                     prepareNextCalculation();
-                    updateScreenOperator(calculationInput);
+                    updateDisplayOperator(calculationInput);
                     calculationPosition = 2;
                     break;
                 case "clear": revertCalculation(); break;
                 case "clear-one": deleteLastInput(); break;
                 case "equals":
-                    calculateScreen();
+                    calculateDisplay();
                     calculationPosition = 4;
                     break;
             } break;
-        case 4: //calculation is showing on the screen
+        case 4: //calculation is showing on the display
         switch(calculationType) {
             case "number": 
                 reset();
@@ -231,7 +230,7 @@ const operateCalculator = function(calculationType, calculationInput) {
                 break;
             case "operator": 
                 prepareNextCalculation();
-                updateScreenOperator(calculationInput);
+                updateDisplayOperator(calculationInput);
                 calculationPosition = 2;
                 break;
             case "clear": revertCalculation(); break;
